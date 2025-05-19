@@ -10,6 +10,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.compose import make_column_transformer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.ensemble import RandomForestClassifier
+import joblib
 from sklearn.metrics import (
     accuracy_score,
     precision_score,
@@ -124,6 +125,8 @@ def train_and_log_model(model_name, model, X_train, y_train, X_test, y_test, **p
 
         # Evaluate model
         predictions = model.predict(X_test)
+        joblib.dump(model, f"D:/Python Labs ITI/mlops/MLOps-Course-Labs/churn_prediction/{model_name}_model.joblib")
+
         accuracy = accuracy_score(y_test, predictions)
         precision = precision_score(y_test, predictions)
         recall = recall_score(y_test, predictions)
@@ -144,8 +147,8 @@ def train_and_log_model(model_name, model, X_train, y_train, X_test, y_test, **p
         conf_mat = confusion_matrix(y_test, predictions)
         disp = ConfusionMatrixDisplay(confusion_matrix=conf_mat)
         disp.plot()
-        plt.savefig("confusion_matrix.png")
-        mlflow.log_artifact("confusion_matrix.png")
+        plt.savefig(f"D:/Python Labs ITI/mlops/MLOps-Course-Labs/churn_prediction/confusion_matrix_{model_name}.png")
+        mlflow.log_artifact(f"D:/Python Labs ITI/mlops/MLOps-Course-Labs/churn_prediction/confusion_matrix_{model_name}.png")
 
 
 def main():
