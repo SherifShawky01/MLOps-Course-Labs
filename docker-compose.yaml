@@ -1,0 +1,49 @@
+services:
+  app:
+    build: app
+    image: ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
+    ports:
+      - 8000:8000
+
+  train:
+    build: training
+    ports:
+      - 4200:4200
+    volumes:
+      - models:/mlruns
+
+  mlflow:
+    build: mlflow
+    ports:
+      - 5000:5000
+    volumes:
+      - models:/mlruns
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - 9090:9090
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+
+  grafana:
+    image: grafana/grafana:latest
+    user: "472"
+    depends_on:
+      - prometheus
+    ports:
+      - 3000:3000
+    volumes:
+      - ./monitoring/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+      - ./monitoring/dashboard.json:/etc/grafana/provisioning/dashboards/dashboard.json
+      - ./monitoring/dashboard.yml:/etc/grafana/provisioning/dashboards/default.yml
+      - grafana-storage:/var/lib/grafana    # Add this line
+    environment:                            # Add these environment variables
+      - GF_DATABASE_TYPE=sqlite3
+      - GF_DATABASE_PATH=/var/lib/grafana/grafana.db
+
+volumes:
+  models:
+  grafana-storage:    # Add this volume
